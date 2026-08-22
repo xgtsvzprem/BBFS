@@ -116,7 +116,7 @@
             </div>
         </label>
 
-        <!-- KONTENER LOCK SEGMEN (DEFAULT SEMBUNYI) -->
+        <!-- KONTENER LOCK SEGMEN -->
         <div id="lock-container" style="display: none; animation: fadeIn 0.3s ease-in-out;">
             <div class="form-group" id="group-bbfs-lock">
                 <span class="note">* Aktif di Mode BBFS & Rekap. Bersifat Hierarki (Membuang hasil yang tak sesuai).</span>
@@ -140,9 +140,9 @@
             </div>
         </label>
 
-        <!-- KONTENER KUNCI POSISI (DEFAULT SEMBUNYI) -->
+        <!-- KONTENER KUNCI POSISI -->
         <div id="posisi-container" style="display: none; animation: fadeIn 0.3s ease-in-out;">
-            <div class="filter-grid">
+            <div class="filter-grid" style="margin-bottom: 10px;">
                 <div class="filter-box">
                     <label class="input-label">As</label><input type="text" id="f-as" placeholder="Cth: 12">
                     <div class="cbx-grp"><label><input type="checkbox" id="as-gj"> Ganjil</label><label><input type="checkbox" id="as-gn"> Genap</label><label><input type="checkbox" id="as-bs"> Besar</label><label><input type="checkbox" id="as-kc"> Kecil</label></div>
@@ -159,6 +159,18 @@
                     <label class="input-label">Ekor</label><input type="text" id="f-ekor" placeholder="Cth: 789">
                     <div class="cbx-grp"><label><input type="checkbox" id="ek-gj"> Ganjil</label><label><input type="checkbox" id="ek-gn"> Genap</label><label><input type="checkbox" id="ek-bs"> Besar</label><label><input type="checkbox" id="ek-kc"> Kecil</label></div>
                 </div>
+            </div>
+            
+            <!-- SWITCH BB 2D KHUSUS POLA TARUNG -->
+            <div style="margin-bottom: 20px; padding: 12px; background: #fffdfd; border: 1px solid #f5c6cb; border-radius: 8px;">
+                <label class="switch-container" for="toggle-bb2d" style="margin-bottom: 0; background: transparent; border: none; padding: 0;">
+                    <span class="switch-label" style="color:var(--danger);">🔄 Bolak-Balik (BB) Khusus 2D</span>
+                    <div class="switch">
+                        <input type="checkbox" id="toggle-bb2d">
+                        <span class="slider"></span>
+                    </div>
+                </label>
+                <span class="note" style="margin-top: 6px;">* Aktifkan untuk membolak-balik otomatis semua hasil kombinasi 2D (Depan, Tengah, Belakang) dari Pola Tarung.</span>
             </div>
         </div>
 
@@ -251,12 +263,10 @@
         }
     }
 
-    // FUNGSI UNTUK MENAMPILKAN/MENYEMBUNYIKAN LOCK SEGMEN
     function toggleLock() {
         document.getElementById("lock-container").style.display = _CHK("toggle-lock") ? "block" : "none";
     }
 
-    // FUNGSI UNTUK MENAMPILKAN/MENYEMBUNYIKAN KUNCI POSISI
     function togglePosisi() {
         document.getElementById("posisi-container").style.display = _CHK("toggle-posisi") ? "block" : "none";
     }
@@ -268,7 +278,6 @@
         document.getElementById("mode-bbfs").checked = true;
         toggleMode();
         
-        // Memastikan kedua switch filter lanjutan tertutup saat menekan CLEAR
         toggleLock(); 
         togglePosisi(); 
         
@@ -345,10 +354,9 @@
     /* === TAB 1: BBFS === */
     function generateBBFS() {
         const b = _VAL("input-bbfs"), isRekap = _CHK("mode-rekap");
-        
-        // Memeriksa status masing-masing switch
         const isLockOn = _CHK("toggle-lock");
         const isPosisiOn = _CHK("toggle-posisi");
+        const isBB2D = _CHK("toggle-bb2d");
         
         const aAs = filterAngka(isPosisiOn ? _VAL("f-as") : "", isPosisiOn ? _CHK("as-gj") : false, isPosisiOn ? _CHK("as-gn") : false, isPosisiOn ? _CHK("as-bs") : false, isPosisiOn ? _CHK("as-kc") : false);
         const aKop = filterAngka(isPosisiOn ? _VAL("f-kop") : "", isPosisiOn ? _CHK("kop-gj") : false, isPosisiOn ? _CHK("kop-gn") : false, isPosisiOn ? _CHK("kop-bs") : false, isPosisiOn ? _CHK("kop-kc") : false);
@@ -385,7 +393,6 @@
                 if(hasPosFilter && aAs.includes(s[0]) && aKop.includes(s[1])) r2d.add(s);
             });
 
-            // Hierarchical Lock Check
             const checkL = (s, lck) => !lck || lck.split('').some(d => s.includes(d));
             r4 = new Set([...r4].filter(s => checkL(s, locks.l4) && checkL(s.slice(1,4), locks.l3) && checkL(s.slice(2,4), locks.l2) && checkL(s.slice(0,3), locks.l3dd) && checkL(s.slice(1,3), locks.l2dt) && checkL(s.slice(0,2), locks.l2dd)));
             r3 = new Set([...r3].filter(s => checkL(s, locks.l3) && checkL(s.slice(1,3), locks.l2) && checkL(s.slice(0,2), locks.l2dt)));
@@ -408,6 +415,20 @@
                 for(let a of aAs) for(let b of aKop) { let s = a+b; if(valid(s)) r2d.add(s); }
             }
         }
+
+        // MENJALANKAN FITUR BOLAK-BALIK 2D 
+        if (isPosisiOn && isBB2D) {
+            const applyReverse2D = (set) => {
+                let temp = [...set];
+                temp.forEach(s => {
+                    if (s.length === 2) set.add(s[1] + s[0]); // Menambahkan versi baliknya (Contoh: "12" -> "21")
+                });
+            };
+            applyReverse2D(r2);
+            applyReverse2D(r2t);
+            applyReverse2D(r2d);
+        }
+
         applySharedFiltersAndDisplay(r4, r3, r2, r3d, r2t, r2d);
     }
 
