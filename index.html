@@ -34,9 +34,9 @@
         input[type="text"]:focus, textarea:focus { outline: none; border-color: var(--primary); }
         textarea { height: 70px; resize: vertical; }
 
-        /* === INPUT WRAPPER & CLEAR BUTTON (NEW) === */
+        /* === INPUT WRAPPER & CLEAR BUTTON === */
         .input-wrap { position: relative; width: 100%; display: block; }
-        .input-wrap input[type="text"] { padding-right: 35px; } /* Ruang agar teks tidak tertimpa tombol X */
+        .input-wrap input[type="text"] { padding-right: 35px; } 
         .btn-clear-inline {
             position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
             background: #ddd; color: #555; width: 22px; height: 22px;
@@ -208,11 +208,13 @@
     <!-- SHARED FILTER -->
     <div class="form-group filter-box" style="border-color: #f5c6cb; background: #fffafb;">
         <label class="input-label" style="color:var(--danger);">Filter Angka Kembar (Twin):</label>
-        <span class="note">* Centang untuk membuang kombinasi yang memiliki angka kembar sesuai jumlahnya.</span>
-        <div class="cbx-grp" style="grid-template-columns: repeat(3, 1fr);">
+        <span class="note">* Centang untuk membuang kombinasi angka kembar yang tidak diinginkan.</span>
+        <!-- Diubah menjadi Grid 2x2 agar lebih rapi menampung 4 tombol -->
+        <div class="cbx-grp" style="grid-template-columns: repeat(2, 1fr);">
             <label><input type="checkbox" id="ex-twin2"> Buang Twin 2</label>
             <label><input type="checkbox" id="ex-twin3"> Buang Twin 3</label>
             <label><input type="checkbox" id="ex-twin4"> Buang Twin 4</label>
+            <label><input type="checkbox" id="ex-twin-aabb"> Buang AABB (Khusus 4D)</label>
         </div>
     </div>
 
@@ -259,30 +261,25 @@
         
         // AUTO-INJECT: Menambahkan tombol (X) otomatis ke semua elemen <input type="text">
         document.querySelectorAll('input[type="text"]').forEach(input => {
-            // Mencegah duplikasi jika fungsi ini dipanggil 2x
             if (input.parentElement.classList.contains('input-wrap')) return;
 
-            // Membungkus kotak input
             const wrapper = document.createElement('div');
             wrapper.className = 'input-wrap';
             input.parentNode.insertBefore(wrapper, input);
             wrapper.appendChild(input);
             
-            // Membuat ikon/tombol (X)
             const clearBtn = document.createElement('span');
             clearBtn.className = 'btn-clear-inline';
-            clearBtn.innerHTML = '&times;'; // Simbol silang bawaan HTML
+            clearBtn.innerHTML = '&times;'; 
             wrapper.appendChild(clearBtn);
             
-            // Logika Muncul/Sembunyi otomatis saat user mengetik
             const toggleClear = () => clearBtn.style.display = input.value ? 'block' : 'none';
             input.addEventListener('input', toggleClear);
             
-            // Aksi saat (X) diklik
             clearBtn.addEventListener('click', () => {
-                input.value = ''; // Kosongkan input
-                toggleClear();    // Sembunyikan tombol (X) kembali
-                input.focus();    // Kembalikan kursor fokus agar bisa langsung ngetik lagi
+                input.value = ''; 
+                toggleClear();    
+                input.focus();    
             });
         });
     }
@@ -305,7 +302,6 @@
             ['lock-4d','lock-3d','lock-2d','lock-3dd','lock-2dt','lock-2dd'].forEach(id => {
                 let el = document.getElementById(id);
                 el.value = "";
-                // Sembunyikan ikon 'X' jika ada
                 if (el.nextElementSibling && el.nextElementSibling.classList.contains('btn-clear-inline')) {
                     el.nextElementSibling.style.display = 'none';
                 }
@@ -322,7 +318,6 @@
     }
 
     function clearAll() {
-        // Mengosongkan input dan menyembunyikan ikon "X" 
         document.querySelectorAll('input[type="text"], textarea').forEach(el => {
             el.value = '';
             if (el.nextElementSibling && el.nextElementSibling.classList.contains('btn-clear-inline')) {
@@ -490,11 +485,22 @@
 
     /* === OUTPUT & CLIPBOARD === */
     function applySharedFiltersAndDisplay(...sets) {
-        const t2 = _CHK("ex-twin2"), t3 = _CHK("ex-twin3"), t4 = _CHK("ex-twin4");
-        const filterTwin = set => (!t2 && !t3 && !t4) ? [...set] : [...set].filter(s => {
-            let max = getMaxTwin(s);
-            return !( (t2 && max === 2) || (t3 && max === 3) || (t4 && max === 4) );
-        });
+        const t2 = _CHK("ex-twin2"), t3 = _CHK("ex-twin3"), t4 = _CHK("ex-twin4"), tAABB = _CHK("ex-twin-aabb");
+        
+        const filterTwin = set => {
+            if (!t2 && !t3 && !t4 && !tAABB) return [...set];
+            return [...set].filter(s => {
+                // Buang Pola AABB khusus untuk hasil yang panjangnya 4 (4D)
+                if (tAABB && s.length === 4 && s[0] === s[1] && s[2] === s[3]) return false;
+                
+                let max = getMaxTwin(s);
+                if (t2 && max === 2) return false;
+                if (t3 && max === 3) return false;
+                if (t4 && max === 4) return false;
+                
+                return true;
+            });
+        };
 
         const results = sets.map(filterTwin);
         const ids = ["4d", "3d", "2d", "3dd", "2dt", "2dd"];
