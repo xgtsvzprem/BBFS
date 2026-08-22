@@ -33,6 +33,18 @@
         input[type="text"], textarea { width: 100%; padding: 12px; border: 1px solid #ccd0d5; border-radius: 6px; box-sizing: border-box; font-family: monospace; font-size: 14px; transition: border 0.2s; }
         input[type="text"]:focus, textarea:focus { outline: none; border-color: var(--primary); }
         textarea { height: 70px; resize: vertical; }
+
+        /* === INPUT WRAPPER & CLEAR BUTTON (NEW) === */
+        .input-wrap { position: relative; width: 100%; display: block; }
+        .input-wrap input[type="text"] { padding-right: 35px; } /* Ruang agar teks tidak tertimpa tombol X */
+        .btn-clear-inline {
+            position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+            background: #ddd; color: #555; width: 22px; height: 22px;
+            border-radius: 50%; text-align: center; line-height: 20px;
+            font-size: 16px; font-weight: bold; cursor: pointer; display: none;
+            transition: 0.2s; user-select: none;
+        }
+        .btn-clear-inline:hover { background: var(--danger); color: white; }
         
         /* === SWITCH TOGGLE UI === */
         .switch-container { display: flex; align-items: center; justify-content: space-between; background: #f8f9fa; padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 15px; cursor: pointer; transition: 0.2s; }
@@ -242,7 +254,38 @@
     const _VAL = id => document.getElementById(id).value.replace(/\D/g, '');
     const _CHK = id => document.getElementById(id).checked;
 
-    function initApp() { toggleMode(); }
+    function initApp() { 
+        toggleMode(); 
+        
+        // AUTO-INJECT: Menambahkan tombol (X) otomatis ke semua elemen <input type="text">
+        document.querySelectorAll('input[type="text"]').forEach(input => {
+            // Mencegah duplikasi jika fungsi ini dipanggil 2x
+            if (input.parentElement.classList.contains('input-wrap')) return;
+
+            // Membungkus kotak input
+            const wrapper = document.createElement('div');
+            wrapper.className = 'input-wrap';
+            input.parentNode.insertBefore(wrapper, input);
+            wrapper.appendChild(input);
+            
+            // Membuat ikon/tombol (X)
+            const clearBtn = document.createElement('span');
+            clearBtn.className = 'btn-clear-inline';
+            clearBtn.innerHTML = '&times;'; // Simbol silang bawaan HTML
+            wrapper.appendChild(clearBtn);
+            
+            // Logika Muncul/Sembunyi otomatis saat user mengetik
+            const toggleClear = () => clearBtn.style.display = input.value ? 'block' : 'none';
+            input.addEventListener('input', toggleClear);
+            
+            // Aksi saat (X) diklik
+            clearBtn.addEventListener('click', () => {
+                input.value = ''; // Kosongkan input
+                toggleClear();    // Sembunyikan tombol (X) kembali
+                input.focus();    // Kembalikan kursor fokus agar bisa langsung ngetik lagi
+            });
+        });
+    }
 
     function openTab(tabId, btn) {
         document.querySelectorAll('.tab-content, .tab-btn').forEach(el => el.classList.remove('active'));
@@ -259,7 +302,14 @@
             : "* Kosongkan jika ingin generate khusus dari Pola Tarung (Kunci Posisi).";
         
         if (isRekap) {
-            ['lock-4d','lock-3d','lock-2d','lock-3dd','lock-2dt','lock-2dd'].forEach(id => document.getElementById(id).value = "");
+            ['lock-4d','lock-3d','lock-2d','lock-3dd','lock-2dt','lock-2dd'].forEach(id => {
+                let el = document.getElementById(id);
+                el.value = "";
+                // Sembunyikan ikon 'X' jika ada
+                if (el.nextElementSibling && el.nextElementSibling.classList.contains('btn-clear-inline')) {
+                    el.nextElementSibling.style.display = 'none';
+                }
+            });
         }
     }
 
@@ -272,7 +322,14 @@
     }
 
     function clearAll() {
-        document.querySelectorAll('input[type="text"], textarea').forEach(el => el.value = '');
+        // Mengosongkan input dan menyembunyikan ikon "X" 
+        document.querySelectorAll('input[type="text"], textarea').forEach(el => {
+            el.value = '';
+            if (el.nextElementSibling && el.nextElementSibling.classList.contains('btn-clear-inline')) {
+                el.nextElementSibling.style.display = 'none';
+            }
+        });
+
         document.querySelectorAll('input[type="checkbox"]:not([name="mode"])').forEach(el => el.checked = false);
         
         document.getElementById("mode-bbfs").checked = true;
@@ -416,12 +473,11 @@
             }
         }
 
-        // MENJALANKAN FITUR BOLAK-BALIK 2D 
         if (isPosisiOn && isBB2D) {
             const applyReverse2D = (set) => {
                 let temp = [...set];
                 temp.forEach(s => {
-                    if (s.length === 2) set.add(s[1] + s[0]); // Menambahkan versi baliknya (Contoh: "12" -> "21")
+                    if (s.length === 2) set.add(s[1] + s[0]); 
                 });
             };
             applyReverse2D(r2);
