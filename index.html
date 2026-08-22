@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta property="og:title" content="Alat Togel: BBFS, Rekap & Kombinasi 💥">
+    <meta property="og:description" content="Aplikasi Generator BBFS, Kombinasi Silang Posisi, Mode Rekap, dan Filter Pintar. Created by Koh Aping.">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💥</text></svg>">
+    <title>Alat Togel by Koh Aping 💥</title>
+    
+    <style>
+        /* === BASE & LAYOUT === */
+        :root { --primary: #0056b3; --success: #28a745; --danger: #d9534f; --bg: #f4f4f9; --box-bg: #fff; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background: var(--bg); padding: 15px; color: #333; margin: 0; }
+        .container { max-width: 500px; margin: 0 auto; background: var(--box-bg); padding: 20px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); }
+        h2 { text-align: center; margin-top: 0; margin-bottom: 20px; color: var(--primary); font-size: 22px; }
+        
+        /* === TABS & MODES === */
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        .tab-btn { flex: 1; padding: 12px; border: none; background: #f0f0f0; font-weight: bold; border-radius: 8px; cursor: pointer; color: #555; transition: all 0.2s ease; }
+        .tab-btn.active { background: var(--primary); color: white; box-shadow: 0 4px 6px rgba(0,86,179,0.2); }
+        .tab-content { display: none; animation: fadeIn 0.3s ease-in-out; }
+        .tab-content.active { display: block; }
+        
+        .mode-selector { display: flex; gap: 15px; margin-bottom: 15px; background: #e9ecef; padding: 12px; border-radius: 8px; font-size: 14px; font-weight: bold; }
+        .mode-selector label { cursor: pointer; display: flex; align-items: center; margin: 0; }
+        .mode-selector input { margin-right: 8px; cursor: pointer; width: 16px; height: 16px; }
+
+        /* === FORMS & INPUTS === */
+        .form-group { margin-bottom: 15px; }
+        .input-label { display: block; margin-bottom: 5px; color: var(--primary); font-weight: bold; font-size: 14px; }
+        .note { font-size: 11.5px; color: var(--danger); margin-bottom: 8px; display: block; line-height: 1.4; }
+        input[type="text"], textarea { width: 100%; padding: 12px; border: 1px solid #ccd0d5; border-radius: 6px; box-sizing: border-box; font-family: monospace; font-size: 14px; transition: border 0.2s; }
+        input[type="text"]:focus, textarea:focus { outline: none; border-color: var(--primary); }
+        textarea { height: 70px; resize: vertical; }
+        
+        /* === GRIDS & FILTERS === */
+        .filter-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+        .lock-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .filter-box { background: #fafafa; padding: 12px; border: 1px solid #e3e3e3; border-radius: 8px; }
+        .cbx-grp { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; font-size: 12px; }
+        .cbx-grp label { display: flex; align-items: center; cursor: pointer; color: #444; }
+        .cbx-grp input { margin-right: 6px; cursor: pointer; }
+
+        /* === BUTTONS === */
+        .btn-group { display: flex; gap: 10px; margin-bottom: 25px; }
+        button { cursor: pointer; transition: all 0.2s ease; border: none; font-weight: bold; }
+        .btn-generate { flex: 3; padding: 14px; background: var(--success); color: white; border-radius: 6px; font-size: 16px; }
+        .btn-generate:hover { background: #218838; transform: translateY(-1px); }
+        .btn-clear { flex: 1; padding: 14px; background: var(--danger); color: white; border-radius: 6px; font-size: 15px; }
+        .btn-clear:hover { background: #c82333; }
+        
+        /* === RESULTS === */
+        .result-group { margin-bottom: 15px; padding: 15px; background: #fff; border: 1px solid #ddd; border-radius: 8px; display: none; box-shadow: 0 2px 4px rgba(0,0,0,0.03); }
+        .result-group.extra { background: #f8fbff; border-color: #cce5ff; } 
+        .result-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-weight: bold; font-size: 14px; }
+        .btn-copy { padding: 6px 12px; background: #007bff; color: white; border-radius: 4px; font-size: 12px; }
+        .btn-copy:hover { background: #0069d9; }
+        .btn-copy-all { width: 100%; padding: 12px; background: #17a2b8; color: white; border-radius: 6px; font-size: 15px; margin-top: 5px; display: none; }
+        .btn-copy-all:hover { background: #138496; }
+        .count { color: var(--danger); }
+        
+        hr { border: 0; border-top: 2px dashed #e0e0e0; margin: 25px 0; }
+        
+        /* === FOOTER === */
+        .footer-credit { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; font-size: 13px; }
+        .footer-credit .author { display: block; font-weight: bold; color: var(--primary); font-size: 15px; margin-bottom: 5px; }
+        .footer-credit .joke { font-style: italic; color: #888; font-size: 12px; display: block; }
+        .visitor-counter { margin-top: 15px; padding-top: 15px; border-top: 1px dashed #eee; }
+        .visitor-counter span { font-size: 11px; color: #999; font-weight: bold; display: block; margin-bottom: 8px; letter-spacing: 1px; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body onload="initApp()">
+
+<div class="container">
+    <h2>💥 ALAT TOGEL JITU 💥</h2>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="openTab('tab-bbfs', this)">🎲 BBFS & Rekap</button>
+        <button class="tab-btn" onclick="openTab('tab-kombinasi', this)">🔗 Kombinasi 2D</button>
+    </div>
+
+    <div id="tab-bbfs" class="tab-content active">
+        <div class="mode-selector">
+            <label><input type="radio" name="mode" id="mode-bbfs" value="bbfs" checked onchange="toggleMode()"> 🎲 Mode BBFS</label>
+            <label><input type="radio" name="mode" id="mode-rekap" value="rekap" onchange="toggleMode()"> 🎯 Mode Rekap</label>
+        </div>
+
+        <div class="form-group">
+            <label class="input-label" id="label-input-utama">Angka BBFS Utama :</label>
+            <span class="note" id="note-input-utama">* Kosongkan jika ingin generate khusus dari Pola Tarung (Kunci Posisi)</span>
+            <input type="text" id="input-bbfs" placeholder="Contoh: 12345" oninput="this.value = this.value.replace(/\D/g, '')">
+        </div>
+
+        <div class="form-group" id="group-bbfs-lock">
+            <label class="input-label" style="color:var(--danger);">Wajib Hadir / Lock Per Segmen :</label>
+            <span class="note">* Aktif di Mode BBFS & Rekap. Bersifat Hierarki (Membuang hasil yang tak sesuai).</span>
+            <div class="filter-grid lock-grid">
+                <div class="filter-box"><label class="note">Lock 4D</label><input type="text" id="lock-4d" placeholder="Cth: 1" oninput="this.value = this.value.replace(/\D/g, '')"></div>
+                <div class="filter-box"><label class="note">Lock 3D Blkg</label><input type="text" id="lock-3d" placeholder="Cth: 1" oninput="this.value = this.value.replace(/\D/g, '')"></div>
+                <div class="filter-box"><label class="note">Lock 2D Blkg</label><input type="text" id="lock-2d" placeholder="Cth: 1" oninput="this.value = this.value.replace(/\D/g, '')"></div>
+                <div class="filter-box"><label class="note">Lock 3D Dpn</label><input type="text" id="lock-3dd" placeholder="Cth: 1" oninput="this.value = this.value.replace(/\D/g, '')"></div>
+                <div class="filter-box"><label class="note">Lock 2D Tgh</label><input type="text" id="lock-2dt" placeholder="Cth: 1" oninput="this.value = this.value.replace(/\D/g, '')"></div>
+                <div class="filter-box"><label class="note">Lock 2D Dpn</label><input type="text" id="lock-2dd" placeholder="Cth: 1" oninput="this.value = this.value.replace(/\D/g, '')"></div>
+            </div>
+        </div>
+
+        <label class="input-label">Kunci Posisi (Pola Tarung & Filter):</label>
+        <div class="filter-grid">
+            <div class="filter-box">
+                <label class="input-label">As</label><input type="text" id="f-as" placeholder="Cth: 12">
+                <div class="cbx-grp"><label><input type="checkbox" id="as-gj"> Ganjil</label><label><input type="checkbox" id="as-gn"> Genap</label><label><input type="checkbox" id="as-bs"> Besar</label><label><input type="checkbox" id="as-kc"> Kecil</label></div>
+            </div>
+            <div class="filter-box">
+                <label class="input-label">Kop</label><input type="text" id="f-kop" placeholder="Cth: 3">
+                <div class="cbx-grp"><label><input type="checkbox" id="kop-gj"> Ganjil</label><label><input type="checkbox" id="kop-gn"> Genap</label><label><input type="checkbox" id="kop-bs"> Besar</label><label><input type="checkbox" id="kop-kc"> Kecil</label></div>
+            </div>
+            <div class="filter-box">
+                <label class="input-label">Kepala</label><input type="text" id="f-kep" placeholder="Cth: 45">
+                <div class="cbx-grp"><label><input type="checkbox" id="kep-gj"> Ganjil</label><label><input type="checkbox" id="kep-gn"> Genap</label><label><input type="checkbox" id="kep-bs"> Besar</label><label><input type="checkbox" id="kep-kc"> Kecil</label></div>
+            </div>
+            <div class="filter-box">
+                <label class="input-label">Ekor</label><input type="text" id="f-ekor" placeholder="Cth: 789">
+                <div class="cbx-grp"><label><input type="checkbox" id="ek-gj"> Ganjil</label><label><input type="checkbox" id="ek-gn"> Genap</label><label><input type="checkbox" id="ek-bs"> Besar</label><label><input type="checkbox" id="ek-kc"> Kecil</label></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="tab-kombinasi" class="tab-content">
+        <div class="form-group">
+            <label class="input-label">Pola Silang / Fix Posisi (23xx, xx23)</label>
+            <span class="note">* Masukkan daftar angka (1 atau 2 digit). Pisahkan dengan spasi atau tanda bintang (*).<br>* Kosongkan segmen yang tidak digunakan.</span>
+            
+            <label style="font-size: 13px; font-weight: bold; margin-top:10px; display:block;">Grup Depan (As & Kop)</label>
+            <textarea id="komb-depan" placeholder="Contoh: 23*14 (Menjadi 23xx, 14xx)"></textarea>
+            
+            <label style="font-size: 13px; font-weight: bold; margin-top:10px; display:block;">Grup Tengah (Kop & Kepala)</label>
+            <textarea id="komb-tengah" placeholder="Contoh: 45 atau 8 (Menjadi x45x)"></textarea>
+            
+            <label style="font-size: 13px; font-weight: bold; margin-top:10px; display:block;">Grup Belakang (Kepala & Ekor)</label>
+            <textarea id="komb-belakang" placeholder="Contoh: 89*90 (Menjadi xx89, xx90)"></textarea>
+        </div>
+    </div>
+
+    <div class="form-group filter-box" style="border-color: #f5c6cb; background: #fffafb;">
+        <label class="input-label" style="color:var(--danger);">Filter Angka Kembar (Twin):</label>
+        <span class="note">* Centang untuk membuang kombinasi yang memiliki angka kembar sesuai jumlahnya.</span>
+        <div class="cbx-grp" style="grid-template-columns: repeat(3, 1fr);">
+            <label><input type="checkbox" id="ex-twin2"> Buang Twin 2</label>
+            <label><input type="checkbox" id="ex-twin3"> Buang Twin 3</label>
+            <label><input type="checkbox" id="ex-twin4"> Buang Twin 4</label>
+        </div>
+    </div>
+
+    <div class="btn-group">
+        <button class="btn-generate" onclick="generateMain()">🔥 GENERATE 🔥</button>
+        <button class="btn-clear" onclick="clearAll()">🧹 CLEAR</button>
+    </div>
+
+    <div id="results-area">
+        <div class="result-group" id="group-4d"><div class="result-header"><label>Hasil 4D (<span class="count" id="count-4d">0</span> line)</label><button class="btn-copy" onclick="copyText('res-4d', this)">📋 Copy</button></div><textarea id="res-4d" readonly></textarea></div>
+        <div class="result-group" id="group-3d"><div class="result-header"><label>Hasil 3D Belakang (<span class="count" id="count-3d">0</span> line)</label><button class="btn-copy" onclick="copyText('res-3d', this)">📋 Copy</button></div><textarea id="res-3d" readonly></textarea></div>
+        <div class="result-group" id="group-2d"><div class="result-header"><label>Hasil 2D Belakang (<span class="count" id="count-2d">0</span> line)</label><button class="btn-copy" onclick="copyText('res-2d', this)">📋 Copy</button></div><textarea id="res-2d" readonly></textarea></div>
+        <button class="btn-copy-all" id="btn-copy-main" onclick="copyAll(this)">📋 COPY SEMUA (Belakang)</button>
+
+        <div id="extra-container" style="display:none;">
+            <hr><h3 style="text-align: center; color: #555; font-size: 16px;">Hasil Kombinasi Depan & Tengah</h3>
+            <div class="result-group extra" id="group-3dd"><div class="result-header"><label>3D Depan (<span class="count" id="count-3dd">0</span> line)</label><button class="btn-copy" onclick="copyText('res-3dd', this)">📋 Copy</button></div><textarea id="res-3dd" readonly></textarea></div>
+            <div class="result-group extra" id="group-2dt"><div class="result-header"><label>2D Tengah (<span class="count" id="count-2dt">0</span> line)</label><button class="btn-copy" onclick="copyText('res-2dt', this)">📋 Copy</button></div><textarea id="res-2dt" readonly></textarea></div>
+            <div class="result-group extra" id="group-2dd"><div class="result-header"><label>2D Depan (<span class="count" id="count-2dd">0</span> line)</label><button class="btn-copy" onclick="copyText('res-2dd', this)">📋 Copy</button></div><textarea id="res-2dd" readonly></textarea></div>
+        </div>
+    </div>
+
+    <div class="footer-credit" id="footer-credit">
+        <span class="author">Created by Koh Aping</span>
+        <span class="joke">"amun meladum tu jangan kada ingat QRIS nya wa lah.. wkwkwkwk"</span>
+        <div class="visitor-counter">
+            <span>STATISTIK PENGUNJUNG</span>
+            <img src="https://api.visitorbadge.io/api/visitors?path=koh-aping-alat-togel-bbfs&countColor=%2328a745&label=VISITORS&labelColor=%23555555" alt="Visitor Counter">
+        </div>
+    </div>
+</div>
+
+<script>
+    /* === UTILS & CONSTANTS === */
+    const NUMBERS = ['0','1','2','3','4','5','6','7','8','9'];
+    const _VAL = id => document.getElementById(id).value.replace(/\D/g, '');
+    const _CHK = id => document.getElementById(id).checked;
+
+    function initApp() { toggleMode(); }
+
+    function openTab(tabId, btn) {
+        document.querySelectorAll('.tab-content, .tab-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        btn.classList.add('active');
+        clearAll(); 
+    }
+
+    function toggleMode() {
+        const isRekap = _CHK("mode-rekap");
+        document.getElementById("label-input-utama").innerText = isRekap ? "Angka Ikut (AI) / Wajib Hadir :" : "Angka BBFS Utama :";
+        document.getElementById("note-input-utama").innerText = isRekap 
+            ? "* Kombinasi akan disaring HANYA memunculkan yang mengandung angka ini (Cth: ketik 1, mencari yang ada angka 1)."
+            : "* Kosongkan jika ingin generate khusus dari Pola Tarung (Kunci Posisi).";
+        
+        if (isRekap) {
+            ['lock-4d','lock-3d','lock-2d','lock-3dd','lock-2dt','lock-2dd'].forEach(id => document.getElementById(id).value = "");
+        }
+    }
+
+    function clearAll() {
+        document.querySelectorAll('input[type="text"], textarea').forEach(el => el.value = '');
+        document.querySelectorAll('input[type="checkbox"]:not([name="mode"])').forEach(el => el.checked = false);
+        document.getElementById("mode-bbfs").checked = true;
+        toggleMode();
+        
+        document.querySelectorAll('.result-group, #extra-container, #btn-copy-main').forEach(el => el.style.display = 'none');
+        document.querySelectorAll('.count').forEach(el => el.innerText = '0');
+        document.getElementById("footer-credit").style.display = "block";
+    }
+
+    /* === CORE LOGIC === */
+    const filterAngka = (val, gj, gn, bs, kc) => {
+        let arr = NUMBERS;
+        if (val) arr = arr.filter(d => val.includes(d));
+        if (gj) arr = arr.filter(d => d % 2 !== 0);
+        if (gn) arr = arr.filter(d => d % 2 === 0);
+        if (bs) arr = arr.filter(d => d >= 5);
+        if (kc) arr = arr.filter(d => d < 5);
+        return arr;
+    };
+
+    function getPermutations(array, size) {
+        let result = [];
+        const p = (current, used) => {
+            if (current.length === size) return result.push(current.join(''));
+            for (let i = 0; i < array.length; i++) {
+                if (!used[i]) {
+                    used[i] = true; current.push(array[i]);
+                    p(current, used);
+                    current.pop(); used[i] = false;
+                }
+            }
+        }
+        p([], new Array(array.length).fill(false));
+        return result; 
+    }
+
+    const getMaxTwin = (str) => {
+        const counts = new Array(10).fill(0);
+        let max = 0;
+        for (let i = 0; i < str.length; i++) {
+            const digit = str.charCodeAt(i) - 48;
+            counts[digit]++;
+            if (counts[digit] > max) max = counts[digit];
+        }
+        return max;
+    };
+
+    function generateMain() {
+        document.querySelector('.tab-content.active').id === 'tab-bbfs' ? generateBBFS() : generateKombinasi();
+    }
+
+    /* === TAB 2: KOMBINASI === */
+    function generateKombinasi() {
+        const parseSeg = id => document.getElementById(id).value.replace(/[^0-9\*\s,]/g, '').split(/[\*\s,]+/).filter(Boolean);
+        const d = parseSeg("komb-depan"), t = parseSeg("komb-tengah"), b = parseSeg("komb-belakang");
+
+        if (!d.length && !t.length && !b.length) return alert("Harap isi minimal satu segmen kombinasi!");
+        document.getElementById("footer-credit").style.display = "none";
+
+        let res4 = new Set(), res3 = new Set(), res2 = new Set(), res3d = new Set(), res2t = new Set(), res2d = new Set();
+        const matchSeg = (str, patterns) => patterns.length === 0 || patterns.some(p => p.length >= 2 ? str === p.substring(0,2) : str.includes(p));
+
+        for (let i = 0; i <= 9999; i++) {
+            let s = i.toString().padStart(4, '0');
+            if (matchSeg(s.substring(0, 2), d) && matchSeg(s.substring(1, 3), t) && matchSeg(s.substring(2, 4), b)) {
+                res4.add(s);
+                if (t.length || b.length) { res3.add(s.substring(1, 4)); res2.add(s.substring(2, 4)); }
+                if (d.length || t.length) { res3d.add(s.substring(0, 3)); res2d.add(s.substring(0, 2)); }
+                if (t.length) res2t.add(s.substring(1, 3));
+            }
+        }
+        applySharedFiltersAndDisplay(res4, res3, res2, res3d, res2t, res2d);
+    }
+
+    /* === TAB 1: BBFS === */
+    function generateBBFS() {
+        const b = _VAL("input-bbfs"), isRekap = _CHK("mode-rekap");
+        const aAs = filterAngka(_VAL("f-as"), _CHK("as-gj"), _CHK("as-gn"), _CHK("as-bs"), _CHK("as-kc"));
+        const aKop = filterAngka(_VAL("f-kop"), _CHK("kop-gj"), _CHK("kop-gn"), _CHK("kop-bs"), _CHK("kop-kc"));
+        const aKep = filterAngka(_VAL("f-kep"), _CHK("kep-gj"), _CHK("kep-gn"), _CHK("kep-bs"), _CHK("kep-kc"));
+        const aEk = filterAngka(_VAL("f-ekor"), _CHK("ek-gj"), _CHK("ek-gn"), _CHK("ek-bs"), _CHK("ek-kc"));
+
+        const locks = { l4: _VAL("lock-4d"), l3: _VAL("lock-3d"), l2: _VAL("lock-2d"), l3dd: _VAL("lock-3dd"), l2dt: _VAL("lock-2dt"), l2dd: _VAL("lock-2dd") };
+        const hasPosFilter = aAs.length<10 || aKop.length<10 || aKep.length<10 || aEk.length<10;
+
+        if (!b && !hasPosFilter) return alert("Harap isi angka BBFS / AI atau minimal satu Kunci Posisi!");
+        
+        if (b && !isRekap) {
+            const allLocks = Object.values(locks).join('');
+            if (allLocks && [...allLocks].some(char => !b.includes(char))) {
+                return alert(`Peringatan: Angka Lock Segmen (${allLocks}) tidak terdapat di dalam BBFS Utama!`);
+            }
+        }
+
+        document.getElementById("footer-credit").style.display = "none";
+        let r4 = new Set(), r3 = new Set(), r2 = new Set(), r3d = new Set(), r2t = new Set(), r2d = new Set();
+
+        if (b && !isRekap) {
+            const ar = b.split('');
+            if (ar.length < 2) return alert("Masukkan minimal 2 digit angka BBFS!");
+
+            if(ar.length >= 4) getPermutations(ar, 4).forEach(s => { if(aAs.includes(s[0]) && aKop.includes(s[1]) && aKep.includes(s[2]) && aEk.includes(s[3])) r4.add(s); });
+            if(ar.length >= 3) getPermutations(ar, 3).forEach(s => { 
+                if(aKop.includes(s[0]) && aKep.includes(s[1]) && aEk.includes(s[2])) r3.add(s); 
+                if(hasPosFilter && aAs.includes(s[0]) && aKop.includes(s[1]) && aKep.includes(s[2])) r3d.add(s);
+            });
+            if(ar.length >= 2) getPermutations(ar, 2).forEach(s => { 
+                if(aKep.includes(s[0]) && aEk.includes(s[1])) r2.add(s);
+                if(hasPosFilter && aKop.includes(s[0]) && aKep.includes(s[1])) r2t.add(s);
+                if(hasPosFilter && aAs.includes(s[0]) && aKop.includes(s[1])) r2d.add(s);
+            });
+
+            // Hierarchical Lock Check
+            const checkL = (s, lck) => !lck || lck.split('').some(d => s.includes(d));
+            r4 = new Set([...r4].filter(s => checkL(s, locks.l4) && checkL(s.slice(1,4), locks.l3) && checkL(s.slice(2,4), locks.l2) && checkL(s.slice(0,3), locks.l3dd) && checkL(s.slice(1,3), locks.l2dt) && checkL(s.slice(0,2), locks.l2dd)));
+            r3 = new Set([...r3].filter(s => checkL(s, locks.l3) && checkL(s.slice(1,3), locks.l2) && checkL(s.slice(0,2), locks.l2dt)));
+            r2 = new Set([...r2].filter(s => checkL(s, locks.l2)));
+            r3d = new Set([...r3d].filter(s => checkL(s, locks.l3dd) && checkL(s.slice(0,2), locks.l2dd) && checkL(s.slice(1,3), locks.l2dt)));
+            r2t = new Set([...r2t].filter(s => checkL(s, locks.l2dt)));
+            r2d = new Set([...r2d].filter(s => checkL(s, locks.l2dd)));
+        } else {
+            const req = b.split('');
+            const valid = (s) => !b || req.some(d => s.includes(d));
+
+            for(let a of aAs) for(let b of aKop) for(let c of aKep) for(let d of aEk) {
+                let s = a+b+c+d; if(valid(s)) r4.add(s);
+            }
+            if((isRekap && b) || hasPosFilter) {
+                for(let b of aKop) for(let c of aKep) for(let d of aEk) { let s = b+c+d; if(valid(s)) r3.add(s); }
+                for(let c of aKep) for(let d of aEk) { let s = c+d; if(valid(s)) r2.add(s); }
+                for(let a of aAs) for(let b of aKop) for(let c of aKep) { let s = a+b+c; if(valid(s)) r3d.add(s); }
+                for(let b of aKop) for(let c of aKep) { let s = b+c; if(valid(s)) r2t.add(s); }
+                for(let a of aAs) for(let b of aKop) { let s = a+b; if(valid(s)) r2d.add(s); }
+            }
+        }
+        applySharedFiltersAndDisplay(r4, r3, r2, r3d, r2t, r2d);
+    }
+
+    /* === OUTPUT & CLIPBOARD === */
+    function applySharedFiltersAndDisplay(...sets) {
+        const t2 = _CHK("ex-twin2"), t3 = _CHK("ex-twin3"), t4 = _CHK("ex-twin4");
+        const filterTwin = set => (!t2 && !t3 && !t4) ? [...set] : [...set].filter(s => {
+            let max = getMaxTwin(s);
+            return !( (t2 && max === 2) || (t3 && max === 3) || (t4 && max === 4) );
+        });
+
+        const results = sets.map(filterTwin);
+        const ids = ["4d", "3d", "2d", "3dd", "2dt", "2dd"];
+        
+        ids.forEach((id, i) => {
+            const arr = results[i];
+            document.getElementById("res-"+id).value = arr.join('*');
+            document.getElementById("count-"+id).innerText = arr.length;
+            document.getElementById("group-"+id).style.display = arr.length > 0 ? "block" : "none";
+        });
+
+        document.getElementById("btn-copy-main").style.display = (results[0].length || results[1].length || results[2].length) ? "block" : "none";
+        document.getElementById("extra-container").style.display = (results[3].length || results[4].length || results[5].length) ? "block" : "none";
+    }
+
+    function doCopy(btn, text) {
+        let ori = btn.innerHTML;
+        if (!text) { 
+            btn.innerHTML = "❌ Kosong"; setTimeout(() => btn.innerHTML = ori, 1500); return; 
+        }
+        const success = () => {
+            btn.innerHTML = "✅ Tersalin"; btn.style.background = "#28a745"; 
+            setTimeout(() => { btn.innerHTML = ori; btn.style.background = ""; }, 1500);
+        };
+        text += '#';
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(text).then(success).catch(() => _fbCopy(text, success));
+        } else { _fbCopy(text, success); }
+    }
+
+    function copyText(id, btn) { doCopy(btn, document.getElementById(id).value); }
+    function copyAll(btn) { 
+        const vals = ["res-4d", "res-3d", "res-2d"].map(id => document.getElementById(id).value).filter(Boolean);
+        doCopy(btn, vals.join('*')); 
+    }
+    function _fbCopy(text, cb) {
+        let el = document.createElement("textarea"); el.value = text; document.body.appendChild(el); 
+        el.select(); document.execCommand("copy"); document.body.removeChild(el); if(cb) cb();
+    }
+</script>
+
+</body>
+</html>
