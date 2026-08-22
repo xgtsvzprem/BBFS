@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta property="og:title" content="BBFS Tools: BBFS, Rekap & Kombinasi 💥">
-    <meta property="og:description" content="Aplikasi Generator BBFS, Kombinasi Silang Posisi, Mode Rekap, dan Filter Pintar. Created by Koh Aping.">
+    <meta property="og:title" content="BBFS Tools: BBFS & Kombinasi 💥">
+    <meta property="og:description" content="Aplikasi Generator BBFS, Kombinasi Silang Posisi, dan Filter Pintar. Created by Koh Aping.">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💥</text></svg>">
     <title>BBFS Tools by Koh Aping 💥</title>
     
@@ -15,16 +15,12 @@
         .container { max-width: 500px; margin: 0 auto; background: var(--box-bg); padding: 20px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); }
         h2 { text-align: center; margin-top: 0; margin-bottom: 20px; color: var(--primary); font-size: 22px; }
         
-        /* === TABS & MODES === */
-        .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        /* === TABS === */
+        .tabs { display: flex; gap: 10px; margin-bottom: 25px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
         .tab-btn { flex: 1; padding: 12px; border: none; background: #f0f0f0; font-weight: bold; border-radius: 8px; cursor: pointer; color: #555; transition: all 0.2s ease; }
         .tab-btn.active { background: var(--primary); color: white; box-shadow: 0 4px 6px rgba(0,86,179,0.2); }
         .tab-content { display: none; animation: fadeIn 0.3s ease-in-out; }
         .tab-content.active { display: block; }
-        
-        .mode-selector { display: flex; gap: 15px; margin-bottom: 15px; background: #e9ecef; padding: 12px; border-radius: 8px; font-size: 14px; font-weight: bold; }
-        .mode-selector label { cursor: pointer; display: flex; align-items: center; margin: 0; }
-        .mode-selector input { margin-right: 8px; cursor: pointer; width: 16px; height: 16px; }
 
         /* === FORMS & INPUTS === */
         .form-group { margin-bottom: 15px; }
@@ -102,20 +98,16 @@
 
     <!-- TAB NAVIGATION -->
     <div class="tabs">
-        <button class="tab-btn active" onclick="openTab('tab-bbfs', this)">🎲 BBFS & Rekap</button>
+        <button class="tab-btn active" onclick="openTab('tab-bbfs', this)">🎲 Alat BBFS Utama</button>
         <button class="tab-btn" onclick="openTab('tab-kombinasi', this)">🔗 Kombinasi 2D</button>
     </div>
 
-    <!-- TAB 1: BBFS & REKAP -->
+    <!-- TAB 1: ALAT BBFS UTAMA -->
     <div id="tab-bbfs" class="tab-content active">
-        <div class="mode-selector">
-            <label><input type="radio" name="mode" id="mode-bbfs" value="bbfs" checked onchange="toggleMode()"> 🎲 Mode BBFS</label>
-            <label><input type="radio" name="mode" id="mode-rekap" value="rekap" onchange="toggleMode()"> 🎯 Mode Rekap</label>
-        </div>
 
-        <div class="form-group">
-            <label class="input-label" id="label-input-utama">Angka BBFS Utama :</label>
-            <span class="note" id="note-input-utama">* Kosongkan jika ingin generate khusus dari Pola Tarung (Kunci Posisi) atau Lock Segmen</span>
+        <div class="form-group" style="margin-bottom: 25px;">
+            <label class="input-label">Angka BBFS Utama :</label>
+            <span class="note">* Masukkan deret angka (Cth: 12345). Kosongkan bagian ini jika Anda hanya ingin menggunakan fitur Lock Segmen / Pola Tarung.</span>
             <input type="text" id="input-bbfs" placeholder="Contoh: 12345" oninput="this.value = this.value.replace(/\D/g, '')">
         </div>
 
@@ -131,7 +123,7 @@
         <!-- KONTENER LOCK SEGMEN -->
         <div id="lock-container" style="display: none; animation: fadeIn 0.3s ease-in-out;">
             <div class="form-group" id="group-bbfs-lock">
-                <span class="note">* Aktif di Mode BBFS & Rekap. Bersifat Hierarki (Membuang hasil yang tak sesuai).</span>
+                <span class="note" style="margin-bottom:12px;">* Tentukan Angka Wajib Hadir di posisi spesifik. Bersifat Hierarki (Membuang kombinasi yang tidak sesuai).</span>
                 <div class="filter-grid lock-grid">
                     <div class="filter-box"><label class="note">Lock 4D</label><input type="text" id="lock-4d" placeholder="Cth: 1" oninput="this.value = this.value.replace(/\D/g, '')"></div>
                     <div class="filter-box"><label class="note">Lock 3D Blkg</label><input type="text" id="lock-3d" placeholder="Cth: 1" oninput="this.value = this.value.replace(/\D/g, '')"></div>
@@ -256,8 +248,6 @@
     const _CHK = id => document.getElementById(id).checked;
 
     function initApp() { 
-        toggleMode(); 
-        
         // AUTO-INJECT: Menambahkan tombol (X) otomatis ke semua elemen <input type="text">
         document.querySelectorAll('input[type="text"]').forEach(input => {
             if (input.parentElement.classList.contains('input-wrap')) return;
@@ -290,24 +280,6 @@
         clearAll(); 
     }
 
-    function toggleMode() {
-        const isRekap = _CHK("mode-rekap");
-        document.getElementById("label-input-utama").innerText = isRekap ? "Angka Ikut (AI) / Wajib Hadir :" : "Angka BBFS Utama :";
-        document.getElementById("note-input-utama").innerText = isRekap 
-            ? "* Kombinasi akan disaring HANYA memunculkan yang mengandung angka ini (Cth: ketik 1, mencari yang ada angka 1)."
-            : "* Kosongkan jika ingin generate khusus dari Pola Tarung (Kunci Posisi) atau Lock Segmen.";
-        
-        if (isRekap) {
-            ['lock-4d','lock-3d','lock-2d','lock-3dd','lock-2dt','lock-2dd'].forEach(id => {
-                let el = document.getElementById(id);
-                el.value = "";
-                if (el.nextElementSibling && el.nextElementSibling.classList.contains('btn-clear-inline')) {
-                    el.nextElementSibling.style.display = 'none';
-                }
-            });
-        }
-    }
-
     function toggleLock() {
         document.getElementById("lock-container").style.display = _CHK("toggle-lock") ? "block" : "none";
     }
@@ -324,10 +296,7 @@
             }
         });
 
-        document.querySelectorAll('input[type="checkbox"]:not([name="mode"])').forEach(el => el.checked = false);
-        
-        document.getElementById("mode-bbfs").checked = true;
-        toggleMode();
+        document.querySelectorAll('input[type="checkbox"]').forEach(el => el.checked = false);
         
         toggleLock(); 
         togglePosisi(); 
@@ -404,7 +373,7 @@
 
     /* === TAB 1: BBFS === */
     function generateBBFS() {
-        const b = _VAL("input-bbfs"), isRekap = _CHK("mode-rekap");
+        const b = _VAL("input-bbfs");
         const isLockOn = _CHK("toggle-lock");
         const isPosisiOn = _CHK("toggle-posisi");
         const isBB2D = _CHK("toggle-bb2d");
@@ -417,14 +386,13 @@
         const locks = isLockOn ? { l4: _VAL("lock-4d"), l3: _VAL("lock-3d"), l2: _VAL("lock-2d"), l3dd: _VAL("lock-3dd"), l2dt: _VAL("lock-2dt"), l2dd: _VAL("lock-2dd") } : { l4:"", l3:"", l2:"", l3dd:"", l2dt:"", l2dd:"" };
         
         const hasPosFilter = isPosisiOn && (aAs.length<10 || aKop.length<10 || aKep.length<10 || aEk.length<10);
-        // Memeriksa apakah ada setidaknya 1 Lock Segmen yang diisi angka
         const hasLockFilter = isLockOn && Object.values(locks).some(val => val.length > 0);
 
         if (!b && !hasPosFilter && !hasLockFilter) {
-            return alert("Harap isi angka BBFS / AI, atau aktifkan Kunci Posisi / Lock Segmen!");
+            return alert("Harap isi angka BBFS Utama, atau aktifkan Kunci Posisi / Lock Segmen!");
         }
         
-        if (b && !isRekap) {
+        if (b) {
             const allLocks = Object.values(locks).join('');
             if (allLocks && [...allLocks].some(char => !b.includes(char))) {
                 return alert(`Peringatan: Angka Lock Segmen (${allLocks}) tidak terdapat di dalam BBFS Utama!`);
@@ -434,10 +402,10 @@
         document.getElementById("footer-credit").style.display = "none";
         let r4 = new Set(), r3 = new Set(), r2 = new Set(), r3d = new Set(), r2t = new Set(), r2d = new Set();
 
-        // Jika BBFS terisi (tanpa Rekap), lakukan permutasi spesifik angka BBFS tsb.
-        if (b && !isRekap) {
+        // LOGIKA BARU: Jika BBFS terisi, lakukan permutasi angka BBFS. Jika kosong, generate dari 0-9.
+        if (b) {
             const ar = b.split('');
-            if (ar.length < 2) return alert("Masukkan minimal 2 digit angka BBFS!");
+            if (ar.length < 2) return alert("Masukkan minimal 2 digit angka BBFS Utama!");
 
             if(ar.length >= 4) getPermutations(ar, 4).forEach(s => { if(aAs.includes(s[0]) && aKop.includes(s[1]) && aKep.includes(s[2]) && aEk.includes(s[3])) r4.add(s); });
             if(ar.length >= 3) getPermutations(ar, 3).forEach(s => { 
@@ -450,26 +418,19 @@
                 if(hasPosFilter && aAs.includes(s[0]) && aKop.includes(s[1])) r2d.add(s);
             });
         } 
-        // Jika Rekap Aktif ATAU (BBFS Kosong + menggunakan Filter Lock/Posisi)
         else {
-            const req = b.split('');
-            // valid() akan otomatis lolos (true) jika "b" kosong
-            const valid = (s) => !b || req.some(d => s.includes(d));
-
+            // BBFS Kosong -> Otomatis bertindak sebagai "Mode Rekap" memanfaatkan filter Lock / Posisi
             for(let a of aAs) for(let b of aKop) for(let c of aKep) for(let d of aEk) {
-                let s = a+b+c+d; if(valid(s)) r4.add(s);
+                r4.add(a+b+c+d);
             }
-            if((isRekap && b) || hasPosFilter || hasLockFilter) {
-                for(let b of aKop) for(let c of aKep) for(let d of aEk) { let s = b+c+d; if(valid(s)) r3.add(s); }
-                for(let c of aKep) for(let d of aEk) { let s = c+d; if(valid(s)) r2.add(s); }
-                for(let a of aAs) for(let b of aKop) for(let c of aKep) { let s = a+b+c; if(valid(s)) r3d.add(s); }
-                for(let b of aKop) for(let c of aKep) { let s = b+c; if(valid(s)) r2t.add(s); }
-                for(let a of aAs) for(let b of aKop) { let s = a+b; if(valid(s)) r2d.add(s); }
-            }
+            for(let b of aKop) for(let c of aKep) for(let d of aEk) { r3.add(b+c+d); }
+            for(let c of aKep) for(let d of aEk) { r2.add(c+d); }
+            for(let a of aAs) for(let b of aKop) for(let c of aKep) { r3d.add(a+b+c); }
+            for(let b of aKop) for(let c of aKep) { r2t.add(b+c); }
+            for(let a of aAs) for(let b of aKop) { r2d.add(a+b); }
         }
 
         // ================= PENYARINGAN LOCK GLOBAL =================
-        // Diterapkan untuk semua hasil terlepas dari mode BBFS maupun mode Rekap/Kosong
         if (isLockOn) {
             const checkL = (s, lck) => !lck || lck.split('').some(d => s.includes(d));
             r4 = new Set([...r4].filter(s => checkL(s, locks.l4) && checkL(s.slice(1,4), locks.l3) && checkL(s.slice(2,4), locks.l2) && checkL(s.slice(0,3), locks.l3dd) && checkL(s.slice(1,3), locks.l2dt) && checkL(s.slice(0,2), locks.l2dd)));
@@ -503,7 +464,6 @@
         const filterTwin = set => {
             if (!t2 && !t3 && !t4 && !tAABB) return [...set];
             return [...set].filter(s => {
-                // Buang Pola AABB khusus untuk hasil yang panjangnya 4 (4D)
                 if (tAABB && s.length === 4 && s[0] === s[1] && s[2] === s[3]) return false;
                 
                 let max = getMaxTwin(s);
