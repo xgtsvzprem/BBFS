@@ -115,7 +115,7 @@
 
         <div class="form-group">
             <label class="input-label" id="label-input-utama">Angka BBFS Utama :</label>
-            <span class="note" id="note-input-utama">* Kosongkan jika ingin generate khusus dari Pola Tarung (Kunci Posisi)</span>
+            <span class="note" id="note-input-utama">* Kosongkan jika ingin generate khusus dari Pola Tarung (Kunci Posisi) atau Lock Segmen</span>
             <input type="text" id="input-bbfs" placeholder="Contoh: 12345" oninput="this.value = this.value.replace(/\D/g, '')">
         </div>
 
@@ -209,7 +209,6 @@
     <div class="form-group filter-box" style="border-color: #f5c6cb; background: #fffafb;">
         <label class="input-label" style="color:var(--danger);">Filter Angka Kembar (Twin):</label>
         <span class="note">* Centang untuk membuang kombinasi angka kembar yang tidak diinginkan.</span>
-        <!-- Diubah menjadi Grid 2x2 agar lebih rapi menampung 4 tombol -->
         <div class="cbx-grp" style="grid-template-columns: repeat(2, 1fr);">
             <label><input type="checkbox" id="ex-twin2"> Buang Twin 2</label>
             <label><input type="checkbox" id="ex-twin3"> Buang Twin 3</label>
@@ -296,7 +295,7 @@
         document.getElementById("label-input-utama").innerText = isRekap ? "Angka Ikut (AI) / Wajib Hadir :" : "Angka BBFS Utama :";
         document.getElementById("note-input-utama").innerText = isRekap 
             ? "* Kombinasi akan disaring HANYA memunculkan yang mengandung angka ini (Cth: ketik 1, mencari yang ada angka 1)."
-            : "* Kosongkan jika ingin generate khusus dari Pola Tarung (Kunci Posisi).";
+            : "* Kosongkan jika ingin generate khusus dari Pola Tarung (Kunci Posisi) atau Lock Segmen.";
         
         if (isRekap) {
             ['lock-4d','lock-3d','lock-2d','lock-3dd','lock-2dt','lock-2dd'].forEach(id => {
@@ -416,9 +415,14 @@
         const aEk = filterAngka(isPosisiOn ? _VAL("f-ekor") : "", isPosisiOn ? _CHK("ek-gj") : false, isPosisiOn ? _CHK("ek-gn") : false, isPosisiOn ? _CHK("ek-bs") : false, isPosisiOn ? _CHK("ek-kc") : false);
 
         const locks = isLockOn ? { l4: _VAL("lock-4d"), l3: _VAL("lock-3d"), l2: _VAL("lock-2d"), l3dd: _VAL("lock-3dd"), l2dt: _VAL("lock-2dt"), l2dd: _VAL("lock-2dd") } : { l4:"", l3:"", l2:"", l3dd:"", l2dt:"", l2dd:"" };
+        
         const hasPosFilter = isPosisiOn && (aAs.length<10 || aKop.length<10 || aKep.length<10 || aEk.length<10);
+        // Memeriksa apakah ada setidaknya 1 Lock Segmen yang diisi angka
+        const hasLockFilter = isLockOn && Object.values(locks).some(val => val.length > 0);
 
-        if (!b && !hasPosFilter) return alert("Harap isi angka BBFS / AI, atau aktifkan Kunci Posisi!");
+        if (!b && !hasPosFilter && !hasLockFilter) {
+            return alert("Harap isi angka BBFS / AI, atau aktifkan Kunci Posisi / Lock Segmen!");
+        }
         
         if (b && !isRekap) {
             const allLocks = Object.values(locks).join('');
@@ -430,6 +434,7 @@
         document.getElementById("footer-credit").style.display = "none";
         let r4 = new Set(), r3 = new Set(), r2 = new Set(), r3d = new Set(), r2t = new Set(), r2d = new Set();
 
+        // Jika BBFS terisi (tanpa Rekap), lakukan permutasi spesifik angka BBFS tsb.
         if (b && !isRekap) {
             const ar = b.split('');
             if (ar.length < 2) return alert("Masukkan minimal 2 digit angka BBFS!");
@@ -444,22 +449,17 @@
                 if(hasPosFilter && aKop.includes(s[0]) && aKep.includes(s[1])) r2t.add(s);
                 if(hasPosFilter && aAs.includes(s[0]) && aKop.includes(s[1])) r2d.add(s);
             });
-
-            const checkL = (s, lck) => !lck || lck.split('').some(d => s.includes(d));
-            r4 = new Set([...r4].filter(s => checkL(s, locks.l4) && checkL(s.slice(1,4), locks.l3) && checkL(s.slice(2,4), locks.l2) && checkL(s.slice(0,3), locks.l3dd) && checkL(s.slice(1,3), locks.l2dt) && checkL(s.slice(0,2), locks.l2dd)));
-            r3 = new Set([...r3].filter(s => checkL(s, locks.l3) && checkL(s.slice(1,3), locks.l2) && checkL(s.slice(0,2), locks.l2dt)));
-            r2 = new Set([...r2].filter(s => checkL(s, locks.l2)));
-            r3d = new Set([...r3d].filter(s => checkL(s, locks.l3dd) && checkL(s.slice(0,2), locks.l2dd) && checkL(s.slice(1,3), locks.l2dt)));
-            r2t = new Set([...r2t].filter(s => checkL(s, locks.l2dt)));
-            r2d = new Set([...r2d].filter(s => checkL(s, locks.l2dd)));
-        } else {
+        } 
+        // Jika Rekap Aktif ATAU (BBFS Kosong + menggunakan Filter Lock/Posisi)
+        else {
             const req = b.split('');
+            // valid() akan otomatis lolos (true) jika "b" kosong
             const valid = (s) => !b || req.some(d => s.includes(d));
 
             for(let a of aAs) for(let b of aKop) for(let c of aKep) for(let d of aEk) {
                 let s = a+b+c+d; if(valid(s)) r4.add(s);
             }
-            if((isRekap && b) || hasPosFilter) {
+            if((isRekap && b) || hasPosFilter || hasLockFilter) {
                 for(let b of aKop) for(let c of aKep) for(let d of aEk) { let s = b+c+d; if(valid(s)) r3.add(s); }
                 for(let c of aKep) for(let d of aEk) { let s = c+d; if(valid(s)) r2.add(s); }
                 for(let a of aAs) for(let b of aKop) for(let c of aKep) { let s = a+b+c; if(valid(s)) r3d.add(s); }
@@ -468,6 +468,19 @@
             }
         }
 
+        // ================= PENYARINGAN LOCK GLOBAL =================
+        // Diterapkan untuk semua hasil terlepas dari mode BBFS maupun mode Rekap/Kosong
+        if (isLockOn) {
+            const checkL = (s, lck) => !lck || lck.split('').some(d => s.includes(d));
+            r4 = new Set([...r4].filter(s => checkL(s, locks.l4) && checkL(s.slice(1,4), locks.l3) && checkL(s.slice(2,4), locks.l2) && checkL(s.slice(0,3), locks.l3dd) && checkL(s.slice(1,3), locks.l2dt) && checkL(s.slice(0,2), locks.l2dd)));
+            r3 = new Set([...r3].filter(s => checkL(s, locks.l3) && checkL(s.slice(1,3), locks.l2) && checkL(s.slice(0,2), locks.l2dt)));
+            r2 = new Set([...r2].filter(s => checkL(s, locks.l2)));
+            r3d = new Set([...r3d].filter(s => checkL(s, locks.l3dd) && checkL(s.slice(0,2), locks.l2dd) && checkL(s.slice(1,3), locks.l2dt)));
+            r2t = new Set([...r2t].filter(s => checkL(s, locks.l2dt)));
+            r2d = new Set([...r2d].filter(s => checkL(s, locks.l2dd)));
+        }
+
+        // ================= FITUR BB 2D KHUSUS =================
         if (isPosisiOn && isBB2D) {
             const applyReverse2D = (set) => {
                 let temp = [...set];
