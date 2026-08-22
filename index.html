@@ -107,19 +107,18 @@
             <input type="text" id="input-bbfs" placeholder="Contoh: 12345" oninput="this.value = this.value.replace(/\D/g, '')">
         </div>
 
-        <!-- SWITCH UNTUK MENAMPILKAN/MENYEMBUNYIKAN FITUR LANJUTAN -->
-        <label class="switch-container" for="toggle-advanced">
-            <span class="switch-label">⚙️ Tampilkan Filter Lanjutan (Lock & Pola)</span>
+        <!-- SWITCH 1: LOCK SEGMEN -->
+        <label class="switch-container" for="toggle-lock">
+            <span class="switch-label">🔒 Aktifkan Lock Per Segmen</span>
             <div class="switch">
-                <input type="checkbox" id="toggle-advanced" onchange="toggleAdvancedFilters()">
+                <input type="checkbox" id="toggle-lock" onchange="toggleLock()">
                 <span class="slider"></span>
             </div>
         </label>
 
-        <!-- KONTENER FITUR LANJUTAN (DEFAULT SEMBUNYI) -->
-        <div id="advanced-filters-container" style="display: none; animation: fadeIn 0.3s ease-in-out;">
+        <!-- KONTENER LOCK SEGMEN (DEFAULT SEMBUNYI) -->
+        <div id="lock-container" style="display: none; animation: fadeIn 0.3s ease-in-out;">
             <div class="form-group" id="group-bbfs-lock">
-                <label class="input-label" style="color:var(--danger);">Wajib Hadir / Lock Per Segmen :</label>
                 <span class="note">* Aktif di Mode BBFS & Rekap. Bersifat Hierarki (Membuang hasil yang tak sesuai).</span>
                 <div class="filter-grid lock-grid">
                     <div class="filter-box"><label class="note">Lock 4D</label><input type="text" id="lock-4d" placeholder="Cth: 1" oninput="this.value = this.value.replace(/\D/g, '')"></div>
@@ -130,8 +129,19 @@
                     <div class="filter-box"><label class="note">Lock 2D Dpn</label><input type="text" id="lock-2dd" placeholder="Cth: 1" oninput="this.value = this.value.replace(/\D/g, '')"></div>
                 </div>
             </div>
+        </div>
 
-            <label class="input-label">Kunci Posisi (Pola Tarung & Filter):</label>
+        <!-- SWITCH 2: KUNCI POSISI / POLA TARUNG -->
+        <label class="switch-container" for="toggle-posisi">
+            <span class="switch-label">🎯 Aktifkan Pola Tarung (Posisi)</span>
+            <div class="switch">
+                <input type="checkbox" id="toggle-posisi" onchange="togglePosisi()">
+                <span class="slider"></span>
+            </div>
+        </label>
+
+        <!-- KONTENER KUNCI POSISI (DEFAULT SEMBUNYI) -->
+        <div id="posisi-container" style="display: none; animation: fadeIn 0.3s ease-in-out;">
             <div class="filter-grid">
                 <div class="filter-box">
                     <label class="input-label">As</label><input type="text" id="f-as" placeholder="Cth: 12">
@@ -151,6 +161,7 @@
                 </div>
             </div>
         </div>
+
     </div>
 
     <!-- TAB 2: KOMBINASI 2D -->
@@ -240,11 +251,14 @@
         }
     }
 
-    // FUNGSI UNTUK MENAMPILKAN/MENYEMBUNYIKAN FILTER LANJUTAN
-    function toggleAdvancedFilters() {
-        const container = document.getElementById("advanced-filters-container");
-        const isChecked = document.getElementById("toggle-advanced").checked;
-        container.style.display = isChecked ? "block" : "none";
+    // FUNGSI UNTUK MENAMPILKAN/MENYEMBUNYIKAN LOCK SEGMEN
+    function toggleLock() {
+        document.getElementById("lock-container").style.display = _CHK("toggle-lock") ? "block" : "none";
+    }
+
+    // FUNGSI UNTUK MENAMPILKAN/MENYEMBUNYIKAN KUNCI POSISI
+    function togglePosisi() {
+        document.getElementById("posisi-container").style.display = _CHK("toggle-posisi") ? "block" : "none";
     }
 
     function clearAll() {
@@ -253,7 +267,10 @@
         
         document.getElementById("mode-bbfs").checked = true;
         toggleMode();
-        toggleAdvancedFilters(); // Memastikan switch filter lanjutan tertutup saat menekan CLEAR
+        
+        // Memastikan kedua switch filter lanjutan tertutup saat menekan CLEAR
+        toggleLock(); 
+        togglePosisi(); 
         
         document.querySelectorAll('.result-group, #extra-container, #btn-copy-main').forEach(el => el.style.display = 'none');
         document.querySelectorAll('.count').forEach(el => el.innerText = '0');
@@ -329,18 +346,19 @@
     function generateBBFS() {
         const b = _VAL("input-bbfs"), isRekap = _CHK("mode-rekap");
         
-        // Memeriksa apakah toggle advanced menyala. Jika mati, anggap filter posisi dan lock kosong
-        const isAdvanced = _CHK("toggle-advanced");
+        // Memeriksa status masing-masing switch
+        const isLockOn = _CHK("toggle-lock");
+        const isPosisiOn = _CHK("toggle-posisi");
         
-        const aAs = filterAngka(isAdvanced ? _VAL("f-as") : "", isAdvanced ? _CHK("as-gj") : false, isAdvanced ? _CHK("as-gn") : false, isAdvanced ? _CHK("as-bs") : false, isAdvanced ? _CHK("as-kc") : false);
-        const aKop = filterAngka(isAdvanced ? _VAL("f-kop") : "", isAdvanced ? _CHK("kop-gj") : false, isAdvanced ? _CHK("kop-gn") : false, isAdvanced ? _CHK("kop-bs") : false, isAdvanced ? _CHK("kop-kc") : false);
-        const aKep = filterAngka(isAdvanced ? _VAL("f-kep") : "", isAdvanced ? _CHK("kep-gj") : false, isAdvanced ? _CHK("kep-gn") : false, isAdvanced ? _CHK("kep-bs") : false, isAdvanced ? _CHK("kep-kc") : false);
-        const aEk = filterAngka(isAdvanced ? _VAL("f-ekor") : "", isAdvanced ? _CHK("ek-gj") : false, isAdvanced ? _CHK("ek-gn") : false, isAdvanced ? _CHK("ek-bs") : false, isAdvanced ? _CHK("ek-kc") : false);
+        const aAs = filterAngka(isPosisiOn ? _VAL("f-as") : "", isPosisiOn ? _CHK("as-gj") : false, isPosisiOn ? _CHK("as-gn") : false, isPosisiOn ? _CHK("as-bs") : false, isPosisiOn ? _CHK("as-kc") : false);
+        const aKop = filterAngka(isPosisiOn ? _VAL("f-kop") : "", isPosisiOn ? _CHK("kop-gj") : false, isPosisiOn ? _CHK("kop-gn") : false, isPosisiOn ? _CHK("kop-bs") : false, isPosisiOn ? _CHK("kop-kc") : false);
+        const aKep = filterAngka(isPosisiOn ? _VAL("f-kep") : "", isPosisiOn ? _CHK("kep-gj") : false, isPosisiOn ? _CHK("kep-gn") : false, isPosisiOn ? _CHK("kep-bs") : false, isPosisiOn ? _CHK("kep-kc") : false);
+        const aEk = filterAngka(isPosisiOn ? _VAL("f-ekor") : "", isPosisiOn ? _CHK("ek-gj") : false, isPosisiOn ? _CHK("ek-gn") : false, isPosisiOn ? _CHK("ek-bs") : false, isPosisiOn ? _CHK("ek-kc") : false);
 
-        const locks = isAdvanced ? { l4: _VAL("lock-4d"), l3: _VAL("lock-3d"), l2: _VAL("lock-2d"), l3dd: _VAL("lock-3dd"), l2dt: _VAL("lock-2dt"), l2dd: _VAL("lock-2dd") } : { l4:"", l3:"", l2:"", l3dd:"", l2dt:"", l2dd:"" };
-        const hasPosFilter = isAdvanced && (aAs.length<10 || aKop.length<10 || aKep.length<10 || aEk.length<10);
+        const locks = isLockOn ? { l4: _VAL("lock-4d"), l3: _VAL("lock-3d"), l2: _VAL("lock-2d"), l3dd: _VAL("lock-3dd"), l2dt: _VAL("lock-2dt"), l2dd: _VAL("lock-2dd") } : { l4:"", l3:"", l2:"", l3dd:"", l2dt:"", l2dd:"" };
+        const hasPosFilter = isPosisiOn && (aAs.length<10 || aKop.length<10 || aKep.length<10 || aEk.length<10);
 
-        if (!b && !hasPosFilter) return alert("Harap isi angka BBFS / AI atau aktifkan dan isi minimal satu Kunci Posisi!");
+        if (!b && !hasPosFilter) return alert("Harap isi angka BBFS / AI, atau aktifkan Kunci Posisi!");
         
         if (b && !isRekap) {
             const allLocks = Object.values(locks).join('');
