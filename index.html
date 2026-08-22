@@ -34,6 +34,17 @@
         input[type="text"]:focus, textarea:focus { outline: none; border-color: var(--primary); }
         textarea { height: 70px; resize: vertical; }
         
+        /* === SWITCH TOGGLE UI === */
+        .switch-container { display: flex; align-items: center; justify-content: space-between; background: #f8f9fa; padding: 12px 15px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 15px; cursor: pointer; transition: 0.2s; }
+        .switch-container:hover { background: #e9ecef; }
+        .switch-label { font-weight: bold; font-size: 13.5px; color: #444; cursor: pointer; flex: 1; }
+        .switch { position: relative; display: inline-block; width: 42px; height: 22px; flex-shrink: 0; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 22px; }
+        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--success); }
+        input:checked + .slider:before { transform: translateX(20px); }
+
         /* === GRIDS & FILTERS === */
         .filter-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
         .lock-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; }
@@ -77,11 +88,13 @@
 <div class="container">
     <h2>💥 ALAT TOGEL JITU 💥</h2>
 
+    <!-- TAB NAVIGATION -->
     <div class="tabs">
         <button class="tab-btn active" onclick="openTab('tab-bbfs', this)">🎲 BBFS & Rekap</button>
         <button class="tab-btn" onclick="openTab('tab-kombinasi', this)">🔗 Kombinasi 2D</button>
     </div>
 
+    <!-- TAB 1: BBFS & REKAP -->
     <div id="tab-bbfs" class="tab-content active">
         <div class="mode-selector">
             <label><input type="radio" name="mode" id="mode-bbfs" value="bbfs" checked onchange="toggleMode()"> 🎲 Mode BBFS</label>
@@ -94,40 +107,53 @@
             <input type="text" id="input-bbfs" placeholder="Contoh: 12345" oninput="this.value = this.value.replace(/\D/g, '')">
         </div>
 
-        <div class="form-group" id="group-bbfs-lock">
-            <label class="input-label" style="color:var(--danger);">Wajib Hadir / Lock Per Segmen :</label>
-            <span class="note">* Aktif di Mode BBFS & Rekap. Bersifat Hierarki (Membuang hasil yang tak sesuai).</span>
-            <div class="filter-grid lock-grid">
-                <div class="filter-box"><label class="note">Lock 4D</label><input type="text" id="lock-4d" placeholder="Cth: 1" oninput="this.value = this.value.replace(/\D/g, '')"></div>
-                <div class="filter-box"><label class="note">Lock 3D Blkg</label><input type="text" id="lock-3d" placeholder="Cth: 1" oninput="this.value = this.value.replace(/\D/g, '')"></div>
-                <div class="filter-box"><label class="note">Lock 2D Blkg</label><input type="text" id="lock-2d" placeholder="Cth: 1" oninput="this.value = this.value.replace(/\D/g, '')"></div>
-                <div class="filter-box"><label class="note">Lock 3D Dpn</label><input type="text" id="lock-3dd" placeholder="Cth: 1" oninput="this.value = this.value.replace(/\D/g, '')"></div>
-                <div class="filter-box"><label class="note">Lock 2D Tgh</label><input type="text" id="lock-2dt" placeholder="Cth: 1" oninput="this.value = this.value.replace(/\D/g, '')"></div>
-                <div class="filter-box"><label class="note">Lock 2D Dpn</label><input type="text" id="lock-2dd" placeholder="Cth: 1" oninput="this.value = this.value.replace(/\D/g, '')"></div>
+        <!-- SWITCH UNTUK MENAMPILKAN/MENYEMBUNYIKAN FITUR LANJUTAN -->
+        <label class="switch-container" for="toggle-advanced">
+            <span class="switch-label">⚙️ Tampilkan Filter Lanjutan (Lock & Pola)</span>
+            <div class="switch">
+                <input type="checkbox" id="toggle-advanced" onchange="toggleAdvancedFilters()">
+                <span class="slider"></span>
             </div>
-        </div>
+        </label>
 
-        <label class="input-label">Kunci Posisi (Pola Tarung & Filter):</label>
-        <div class="filter-grid">
-            <div class="filter-box">
-                <label class="input-label">As</label><input type="text" id="f-as" placeholder="Cth: 12">
-                <div class="cbx-grp"><label><input type="checkbox" id="as-gj"> Ganjil</label><label><input type="checkbox" id="as-gn"> Genap</label><label><input type="checkbox" id="as-bs"> Besar</label><label><input type="checkbox" id="as-kc"> Kecil</label></div>
+        <!-- KONTENER FITUR LANJUTAN (DEFAULT SEMBUNYI) -->
+        <div id="advanced-filters-container" style="display: none; animation: fadeIn 0.3s ease-in-out;">
+            <div class="form-group" id="group-bbfs-lock">
+                <label class="input-label" style="color:var(--danger);">Wajib Hadir / Lock Per Segmen :</label>
+                <span class="note">* Aktif di Mode BBFS & Rekap. Bersifat Hierarki (Membuang hasil yang tak sesuai).</span>
+                <div class="filter-grid lock-grid">
+                    <div class="filter-box"><label class="note">Lock 4D</label><input type="text" id="lock-4d" placeholder="Cth: 1" oninput="this.value = this.value.replace(/\D/g, '')"></div>
+                    <div class="filter-box"><label class="note">Lock 3D Blkg</label><input type="text" id="lock-3d" placeholder="Cth: 1" oninput="this.value = this.value.replace(/\D/g, '')"></div>
+                    <div class="filter-box"><label class="note">Lock 2D Blkg</label><input type="text" id="lock-2d" placeholder="Cth: 1" oninput="this.value = this.value.replace(/\D/g, '')"></div>
+                    <div class="filter-box"><label class="note">Lock 3D Dpn</label><input type="text" id="lock-3dd" placeholder="Cth: 1" oninput="this.value = this.value.replace(/\D/g, '')"></div>
+                    <div class="filter-box"><label class="note">Lock 2D Tgh</label><input type="text" id="lock-2dt" placeholder="Cth: 1" oninput="this.value = this.value.replace(/\D/g, '')"></div>
+                    <div class="filter-box"><label class="note">Lock 2D Dpn</label><input type="text" id="lock-2dd" placeholder="Cth: 1" oninput="this.value = this.value.replace(/\D/g, '')"></div>
+                </div>
             </div>
-            <div class="filter-box">
-                <label class="input-label">Kop</label><input type="text" id="f-kop" placeholder="Cth: 3">
-                <div class="cbx-grp"><label><input type="checkbox" id="kop-gj"> Ganjil</label><label><input type="checkbox" id="kop-gn"> Genap</label><label><input type="checkbox" id="kop-bs"> Besar</label><label><input type="checkbox" id="kop-kc"> Kecil</label></div>
-            </div>
-            <div class="filter-box">
-                <label class="input-label">Kepala</label><input type="text" id="f-kep" placeholder="Cth: 45">
-                <div class="cbx-grp"><label><input type="checkbox" id="kep-gj"> Ganjil</label><label><input type="checkbox" id="kep-gn"> Genap</label><label><input type="checkbox" id="kep-bs"> Besar</label><label><input type="checkbox" id="kep-kc"> Kecil</label></div>
-            </div>
-            <div class="filter-box">
-                <label class="input-label">Ekor</label><input type="text" id="f-ekor" placeholder="Cth: 789">
-                <div class="cbx-grp"><label><input type="checkbox" id="ek-gj"> Ganjil</label><label><input type="checkbox" id="ek-gn"> Genap</label><label><input type="checkbox" id="ek-bs"> Besar</label><label><input type="checkbox" id="ek-kc"> Kecil</label></div>
+
+            <label class="input-label">Kunci Posisi (Pola Tarung & Filter):</label>
+            <div class="filter-grid">
+                <div class="filter-box">
+                    <label class="input-label">As</label><input type="text" id="f-as" placeholder="Cth: 12">
+                    <div class="cbx-grp"><label><input type="checkbox" id="as-gj"> Ganjil</label><label><input type="checkbox" id="as-gn"> Genap</label><label><input type="checkbox" id="as-bs"> Besar</label><label><input type="checkbox" id="as-kc"> Kecil</label></div>
+                </div>
+                <div class="filter-box">
+                    <label class="input-label">Kop</label><input type="text" id="f-kop" placeholder="Cth: 3">
+                    <div class="cbx-grp"><label><input type="checkbox" id="kop-gj"> Ganjil</label><label><input type="checkbox" id="kop-gn"> Genap</label><label><input type="checkbox" id="kop-bs"> Besar</label><label><input type="checkbox" id="kop-kc"> Kecil</label></div>
+                </div>
+                <div class="filter-box">
+                    <label class="input-label">Kepala</label><input type="text" id="f-kep" placeholder="Cth: 45">
+                    <div class="cbx-grp"><label><input type="checkbox" id="kep-gj"> Ganjil</label><label><input type="checkbox" id="kep-gn"> Genap</label><label><input type="checkbox" id="kep-bs"> Besar</label><label><input type="checkbox" id="kep-kc"> Kecil</label></div>
+                </div>
+                <div class="filter-box">
+                    <label class="input-label">Ekor</label><input type="text" id="f-ekor" placeholder="Cth: 789">
+                    <div class="cbx-grp"><label><input type="checkbox" id="ek-gj"> Ganjil</label><label><input type="checkbox" id="ek-gn"> Genap</label><label><input type="checkbox" id="ek-bs"> Besar</label><label><input type="checkbox" id="ek-kc"> Kecil</label></div>
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- TAB 2: KOMBINASI 2D -->
     <div id="tab-kombinasi" class="tab-content">
         <div class="form-group">
             <label class="input-label">Pola Silang / Fix Posisi (23xx, xx23)</label>
@@ -144,6 +170,7 @@
         </div>
     </div>
 
+    <!-- SHARED FILTER -->
     <div class="form-group filter-box" style="border-color: #f5c6cb; background: #fffafb;">
         <label class="input-label" style="color:var(--danger);">Filter Angka Kembar (Twin):</label>
         <span class="note">* Centang untuk membuang kombinasi yang memiliki angka kembar sesuai jumlahnya.</span>
@@ -154,11 +181,13 @@
         </div>
     </div>
 
+    <!-- BUTTONS -->
     <div class="btn-group">
         <button class="btn-generate" onclick="generateMain()">🔥 GENERATE 🔥</button>
         <button class="btn-clear" onclick="clearAll()">🧹 CLEAR</button>
     </div>
 
+    <!-- RESULTS -->
     <div id="results-area">
         <div class="result-group" id="group-4d"><div class="result-header"><label>Hasil 4D (<span class="count" id="count-4d">0</span> line)</label><button class="btn-copy" onclick="copyText('res-4d', this)">📋 Copy</button></div><textarea id="res-4d" readonly></textarea></div>
         <div class="result-group" id="group-3d"><div class="result-header"><label>Hasil 3D Belakang (<span class="count" id="count-3d">0</span> line)</label><button class="btn-copy" onclick="copyText('res-3d', this)">📋 Copy</button></div><textarea id="res-3d" readonly></textarea></div>
@@ -173,6 +202,7 @@
         </div>
     </div>
 
+    <!-- FOOTER -->
     <div class="footer-credit" id="footer-credit">
         <span class="author">Created by Koh Aping</span>
         <span class="joke">"amun meladum tu jangan kada ingat QRIS nya wa lah.. wkwkwkwk"</span>
@@ -210,11 +240,20 @@
         }
     }
 
+    // FUNGSI UNTUK MENAMPILKAN/MENYEMBUNYIKAN FILTER LANJUTAN
+    function toggleAdvancedFilters() {
+        const container = document.getElementById("advanced-filters-container");
+        const isChecked = document.getElementById("toggle-advanced").checked;
+        container.style.display = isChecked ? "block" : "none";
+    }
+
     function clearAll() {
         document.querySelectorAll('input[type="text"], textarea').forEach(el => el.value = '');
         document.querySelectorAll('input[type="checkbox"]:not([name="mode"])').forEach(el => el.checked = false);
+        
         document.getElementById("mode-bbfs").checked = true;
         toggleMode();
+        toggleAdvancedFilters(); // Memastikan switch filter lanjutan tertutup saat menekan CLEAR
         
         document.querySelectorAll('.result-group, #extra-container, #btn-copy-main').forEach(el => el.style.display = 'none');
         document.querySelectorAll('.count').forEach(el => el.innerText = '0');
@@ -289,15 +328,19 @@
     /* === TAB 1: BBFS === */
     function generateBBFS() {
         const b = _VAL("input-bbfs"), isRekap = _CHK("mode-rekap");
-        const aAs = filterAngka(_VAL("f-as"), _CHK("as-gj"), _CHK("as-gn"), _CHK("as-bs"), _CHK("as-kc"));
-        const aKop = filterAngka(_VAL("f-kop"), _CHK("kop-gj"), _CHK("kop-gn"), _CHK("kop-bs"), _CHK("kop-kc"));
-        const aKep = filterAngka(_VAL("f-kep"), _CHK("kep-gj"), _CHK("kep-gn"), _CHK("kep-bs"), _CHK("kep-kc"));
-        const aEk = filterAngka(_VAL("f-ekor"), _CHK("ek-gj"), _CHK("ek-gn"), _CHK("ek-bs"), _CHK("ek-kc"));
+        
+        // Memeriksa apakah toggle advanced menyala. Jika mati, anggap filter posisi dan lock kosong
+        const isAdvanced = _CHK("toggle-advanced");
+        
+        const aAs = filterAngka(isAdvanced ? _VAL("f-as") : "", isAdvanced ? _CHK("as-gj") : false, isAdvanced ? _CHK("as-gn") : false, isAdvanced ? _CHK("as-bs") : false, isAdvanced ? _CHK("as-kc") : false);
+        const aKop = filterAngka(isAdvanced ? _VAL("f-kop") : "", isAdvanced ? _CHK("kop-gj") : false, isAdvanced ? _CHK("kop-gn") : false, isAdvanced ? _CHK("kop-bs") : false, isAdvanced ? _CHK("kop-kc") : false);
+        const aKep = filterAngka(isAdvanced ? _VAL("f-kep") : "", isAdvanced ? _CHK("kep-gj") : false, isAdvanced ? _CHK("kep-gn") : false, isAdvanced ? _CHK("kep-bs") : false, isAdvanced ? _CHK("kep-kc") : false);
+        const aEk = filterAngka(isAdvanced ? _VAL("f-ekor") : "", isAdvanced ? _CHK("ek-gj") : false, isAdvanced ? _CHK("ek-gn") : false, isAdvanced ? _CHK("ek-bs") : false, isAdvanced ? _CHK("ek-kc") : false);
 
-        const locks = { l4: _VAL("lock-4d"), l3: _VAL("lock-3d"), l2: _VAL("lock-2d"), l3dd: _VAL("lock-3dd"), l2dt: _VAL("lock-2dt"), l2dd: _VAL("lock-2dd") };
-        const hasPosFilter = aAs.length<10 || aKop.length<10 || aKep.length<10 || aEk.length<10;
+        const locks = isAdvanced ? { l4: _VAL("lock-4d"), l3: _VAL("lock-3d"), l2: _VAL("lock-2d"), l3dd: _VAL("lock-3dd"), l2dt: _VAL("lock-2dt"), l2dd: _VAL("lock-2dd") } : { l4:"", l3:"", l2:"", l3dd:"", l2dt:"", l2dd:"" };
+        const hasPosFilter = isAdvanced && (aAs.length<10 || aKop.length<10 || aKep.length<10 || aEk.length<10);
 
-        if (!b && !hasPosFilter) return alert("Harap isi angka BBFS / AI atau minimal satu Kunci Posisi!");
+        if (!b && !hasPosFilter) return alert("Harap isi angka BBFS / AI atau aktifkan dan isi minimal satu Kunci Posisi!");
         
         if (b && !isRekap) {
             const allLocks = Object.values(locks).join('');
