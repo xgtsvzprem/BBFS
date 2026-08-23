@@ -201,11 +201,13 @@
     <div class="form-group filter-box" style="border-color: #f5c6cb; background: #fffafb;">
         <label class="input-label" style="color:var(--danger);">Filter Angka Kembar (Twin):</label>
         <span class="note">* Centang untuk membuang kombinasi angka kembar yang tidak diinginkan.</span>
+        <!-- Diperbarui agar bisa menampung 5 tombol -->
         <div class="cbx-grp" style="grid-template-columns: repeat(2, 1fr);">
             <label><input type="checkbox" id="ex-twin2"> Buang Twin 2</label>
             <label><input type="checkbox" id="ex-twin3"> Buang Twin 3</label>
             <label><input type="checkbox" id="ex-twin4"> Buang Twin 4</label>
             <label><input type="checkbox" id="ex-twin-aabb"> Buang AABB (Khusus 4D)</label>
+            <label><input type="checkbox" id="ex-twin-abab"> Buang ABAB (Khusus 4D)</label>
         </div>
     </div>
 
@@ -402,7 +404,6 @@
         document.getElementById("footer-credit").style.display = "none";
         let r4 = new Set(), r3 = new Set(), r2 = new Set(), r3d = new Set(), r2t = new Set(), r2d = new Set();
 
-        // LOGIKA BARU: Jika BBFS terisi, lakukan permutasi angka BBFS. Jika kosong, generate dari 0-9.
         if (b) {
             const ar = b.split('');
             if (ar.length < 2) return alert("Masukkan minimal 2 digit angka BBFS Utama!");
@@ -419,7 +420,6 @@
             });
         } 
         else {
-            // BBFS Kosong -> Otomatis bertindak sebagai "Mode Rekap" memanfaatkan filter Lock / Posisi
             for(let a of aAs) for(let b of aKop) for(let c of aKep) for(let d of aEk) {
                 r4.add(a+b+c+d);
             }
@@ -459,12 +459,15 @@
 
     /* === OUTPUT & CLIPBOARD === */
     function applySharedFiltersAndDisplay(...sets) {
-        const t2 = _CHK("ex-twin2"), t3 = _CHK("ex-twin3"), t4 = _CHK("ex-twin4"), tAABB = _CHK("ex-twin-aabb");
+        const t2 = _CHK("ex-twin2"), t3 = _CHK("ex-twin3"), t4 = _CHK("ex-twin4");
+        const tAABB = _CHK("ex-twin-aabb"), tABAB = _CHK("ex-twin-abab");
         
         const filterTwin = set => {
-            if (!t2 && !t3 && !t4 && !tAABB) return [...set];
+            if (!t2 && !t3 && !t4 && !tAABB && !tABAB) return [...set];
             return [...set].filter(s => {
+                // Buang pola spesifik hanya jika panjang karakter 4 (4D)
                 if (tAABB && s.length === 4 && s[0] === s[1] && s[2] === s[3]) return false;
+                if (tABAB && s.length === 4 && s[0] === s[2] && s[1] === s[3]) return false;
                 
                 let max = getMaxTwin(s);
                 if (t2 && max === 2) return false;
