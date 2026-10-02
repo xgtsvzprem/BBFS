@@ -199,15 +199,25 @@
 
     <!-- SHARED FILTER -->
     <div class="form-group filter-box" style="border-color: #f5c6cb; background: #fffafb;">
-        <label class="input-label" style="color:var(--danger);">Filter Angka Kembar (Twin):</label>
-        <span class="note">* Centang untuk membuang kombinasi angka kembar yang tidak diinginkan.</span>
-        <!-- Diperbarui agar bisa menampung 5 tombol -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 10px;">
+            <label class="input-label" style="color:var(--danger); margin: 0;">Filter Angka Kembar (Twin):</label>
+            <div style="display: flex; gap: 15px; font-size: 13px; font-weight: bold;">
+                <label style="cursor: pointer; color: var(--danger);">
+                    <input type="radio" name="twin-mode" id="mode-blacklist" checked> Blacklist (Buang)
+                </label>
+                <label style="cursor: pointer; color: var(--success);">
+                    <input type="radio" name="twin-mode" id="mode-whitelist"> Whitelist (Ambil)
+                </label>
+            </div>
+        </div>
+        <span class="note">* <b>Blacklist</b>: Membuang angka kembar yang dicentang. <b>Whitelist</b>: HANYA mengambil angka kembar yang dicentang (buang semua yang lain).</span>
+        
         <div class="cbx-grp" style="grid-template-columns: repeat(2, 1fr);">
-            <label><input type="checkbox" id="ex-twin2"> Buang Twin 2</label>
-            <label><input type="checkbox" id="ex-twin3"> Buang Twin 3</label>
-            <label><input type="checkbox" id="ex-twin4"> Buang Twin 4</label>
-            <label><input type="checkbox" id="ex-twin-aabb"> Buang AABB (Khusus 4D)</label>
-            <label><input type="checkbox" id="ex-twin-abab"> Buang ABAB (Khusus 4D)</label>
+            <label><input type="checkbox" id="ex-twin2"> Twin 2</label>
+            <label><input type="checkbox" id="ex-twin3"> Twin 3</label>
+            <label><input type="checkbox" id="ex-twin4"> Twin 4</label>
+            <label><input type="checkbox" id="ex-twin-aabb"> Pola AABB (Khusus 4D)</label>
+            <label><input type="checkbox" id="ex-twin-abab"> Pola ABAB (Khusus 4D)</label>
         </div>
     </div>
 
@@ -299,6 +309,7 @@
         });
 
         document.querySelectorAll('input[type="checkbox"]').forEach(el => el.checked = false);
+        document.getElementById('mode-blacklist').checked = true;
         
         toggleLock(); 
         togglePosisi(); 
@@ -457,24 +468,51 @@
         applySharedFiltersAndDisplay(r4, r3, r2, r3d, r2t, r2d);
     }
 
-    /* === OUTPUT & CLIPBOARD === */
+    /* === OUTPUT & KATEGORISASI FILTER === */
     function applySharedFiltersAndDisplay(...sets) {
         const t2 = _CHK("ex-twin2"), t3 = _CHK("ex-twin3"), t4 = _CHK("ex-twin4");
         const tAABB = _CHK("ex-twin-aabb"), tABAB = _CHK("ex-twin-abab");
+        const isWhitelist = _CHK("mode-whitelist");
         
         const filterTwin = set => {
+            // Bypass filter jika tidak ada checkbox twin yang aktif sama sekali
             if (!t2 && !t3 && !t4 && !tAABB && !tABAB) return [...set];
+            
             return [...set].filter(s => {
-                // Buang pola spesifik hanya jika panjang karakter 4 (4D)
-                if (tAABB && s.length === 4 && s[0] === s[1] && s[2] === s[3]) return false;
-                if (tABAB && s.length === 4 && s[0] === s[2] && s[1] === s[3]) return false;
-                
                 let max = getMaxTwin(s);
-                if (t2 && max === 2) return false;
-                if (t3 && max === 3) return false;
-                if (t4 && max === 4) return false;
+                let category = "NONE"; 
                 
-                return true;
+                // MENGISOLASI KATEGORI ANGKA SECARA KETAT & MUTLAK
+                if (max === 4) {
+                    category = "TWIN4";
+                } else if (max === 3) {
+                    category = "TWIN3";
+                } else if (max === 2) {
+                    if (s.length === 4) {
+                        if (s[0] === s[1] && s[2] === s[3]) category = "AABB";
+                        else if (s[0] === s[2] && s[1] === s[3]) category = "ABAB";
+                        else category = "TWIN2"; // Selain pola spesifik, masuk ke Twin 2 standard
+                    } else {
+                        category = "TWIN2"; // Untuk angka 2D dan 3D otomatis Twin 2
+                    }
+                }
+                
+                let match = false;
+                if (category === "TWIN4" && t4) match = true;
+                else if (category === "TWIN3" && t3) match = true;
+                else if (category === "AABB" && tAABB) match = true;
+                else if (category === "ABAB" && tABAB) match = true;
+                else if (category === "TWIN2" && t2) match = true;
+                
+                // FINAL DECISION BERDASARKAN MODE
+                if (isWhitelist) {
+                    // MODE WHITELIST: Pokoknya buang semua yang TIDAK match dengan kotak centang.
+                    return match;
+                } else {
+                    // MODE BLACKLIST: Buang angka JIKA ada match.
+                    // Namun, angka normal yang sama sekali tidak kembar (NONE) HARUS lolos (true).
+                    return category === "NONE" ? true : !match;
+                }
             });
         };
 
