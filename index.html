@@ -210,7 +210,7 @@
                 </label>
             </div>
         </div>
-        <span class="note">* <b>Blacklist</b>: Membuang angka kembar yang dicentang. <b>Whitelist</b>: HANYA mengambil angka kembar yang dicentang (buang semua yang lain).</span>
+        <span class="note">* <b>Blacklist</b>: Membuang angka kembar. <b>Whitelist</b>: HANYA mengambil kembar yang dicentang.<br><strong style="color:#a94442;">*Catatan: Filter kembar di bawah ini khusus berlaku untuk HANYA hasil 4D.</strong></span>
         
         <div class="cbx-grp" style="grid-template-columns: repeat(2, 1fr);">
             <label><input type="checkbox" id="ex-twin2"> Twin 2</label>
@@ -493,7 +493,7 @@
                         else if (s[0] === s[2] && s[1] === s[3]) category = "ABAB";
                         else category = "TWIN2"; // Selain pola spesifik, masuk ke Twin 2 standard
                     } else {
-                        category = "TWIN2"; // Untuk angka 2D dan 3D otomatis Twin 2
+                        category = "TWIN2"; // Untuk angka 2D dan 3D otomatis Twin 2 (tapi sekarang dilompati)
                     }
                 }
                 
@@ -516,7 +516,12 @@
             });
         };
 
-        const results = sets.map(filterTwin);
+        // HANYA terapkan filter ke set[0] (r4 / 4D), set lainnya dibiarkan utuh menjadi array
+        const results = sets.map((set, index) => {
+            if (index === 0) return filterTwin(set);
+            return [...set]; 
+        });
+
         const ids = ["4d", "3d", "2d", "3dd", "2dt", "2dd"];
         
         ids.forEach((id, i) => {
